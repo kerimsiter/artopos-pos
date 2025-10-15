@@ -58,7 +58,7 @@ export default function LoginPage() {
       {/* --- Sağ Taraf: Giriş Formu --- */}
       <section className="flex flex-col items-center justify-center bg-white p-8 dark:bg-neutral-800">
         <div className="absolute right-8 top-8">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild className="text-body-s">
             <Link href="/support">
               <Headset className="mr-2 h-4 w-4" />
               Destek İste
