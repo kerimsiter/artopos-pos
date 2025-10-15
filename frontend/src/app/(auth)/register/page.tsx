@@ -10,20 +10,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Typography } from "@/components/ui/typography";
 import { Icons } from "@/components/icons";
 import { useState } from "react";
-import { Combobox } from "@/components/ui/combobox";
-
-// Bu veriyi ayrı bir constants dosyasından almak daha iyi olacaktır.
-const countries = [
-    { value: "tr", label: "+90 (Türkiye)" },
-    { value: "us", label: "+1 (United States)" },
-    { value: "gb", label: "+44 (United Kingdom)" },
-    // ... diğer ülkeler
-];
+import { PhoneInputAdvanced } from "@/components/ui/phone-input-advanced";
+import type { Country } from "@/lib/countries-data";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [countryCode, setCountryCode] = useState("tr");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneValid, setPhoneValid] = useState(false);
+  const [phoneCountry, setPhoneCountry] = useState<Country | null>(null);
 
   return (
     <main className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
@@ -80,21 +75,19 @@ export default function RegisterPage() {
               <Input id="email" type="email" placeholder="ornek@email.com" required />
             </div>
             <div className="space-y-3">
-                <Label className="text-body-m">Cep Telefonu</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="col-span-1">
-                    <Combobox
-                      options={countries}
-                      value={countryCode}
-                      onChange={setCountryCode}
-                      placeholder="Ülke"
-                      className="z-10"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Input id="phone" type="tel" placeholder="555 123 4567" required />
-                  </div>
-                </div>
+                <Label htmlFor="phone" className="text-body-m">Cep Telefonu</Label>
+                <PhoneInputAdvanced
+                  value={phoneNumber}
+                  onChange={(value, isValid, country) => {
+                    setPhoneNumber(value);
+                    setPhoneValid(isValid);
+                    setPhoneCountry(country);
+                  }}
+                  defaultCountry="TR"
+                  required
+                  showValidation
+                  autoFormat
+                />
             </div>
             
             {/* Şifre alanları */}

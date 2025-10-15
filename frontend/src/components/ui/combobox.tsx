@@ -27,9 +27,11 @@ type ComboboxProps = {
     searchPlaceholder?: string
     emptyPlaceholder?: string
     className?: string
+    getTriggerLabel?: (value: string | undefined, option: { label: string; value: string } | undefined) => string
+    getItemLabel?: (option: { label: string; value: string }) => string
 }
 
-export function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyPlaceholder, className }: ComboboxProps) {
+export function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyPlaceholder, className, getTriggerLabel, getItemLabel }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
   return (
@@ -41,15 +43,17 @@ export function Combobox({ options, value, onChange, placeholder, searchPlacehol
           aria-expanded={open}
           className={cn("w-full justify-between h-14 rounded-xl text-body-s", className)}
         >
-          {value
-            ? options.find((option) => option.value === value)?.label
-            : placeholder || "Seçim yapın..."}
+          {(function(){
+            const selected = options.find((option) => option.value === value)
+            if (selected) return getTriggerLabel ? getTriggerLabel(value, selected) : selected.label
+            return placeholder || "Seçim yapın..."
+          })()}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+      <PopoverContent className="z-50 w-[--radix-popover-trigger-width] p-0">
         <Command>
-          <CommandInput placeholder={searchPlaceholder || "Ara..."} />
+          <CommandInput placeholder={searchPlaceholder || "Ülke Ara"} />
           <CommandList>
             <CommandEmpty>{emptyPlaceholder || "Sonuç bulunamadı."}</CommandEmpty>
             <CommandGroup>
@@ -68,7 +72,7 @@ export function Combobox({ options, value, onChange, placeholder, searchPlacehol
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {option.label}
+                  {getItemLabel ? getItemLabel(option) : option.label}
                 </CommandItem>
               ))}
             </CommandGroup>
