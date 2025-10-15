@@ -1,0 +1,6 @@
+Bu klasöre aşağıdaki görselleri eklemeniz gerekiyor:
+
+1. login-bg.jpg - Login sayfası arka plan görseli (restaurant/cafe temalı)
+2. avatar.png - Kullanıcı avatar görseli (48x48px)
+
+Bu görseller olmadan login sayfası tam olarak çalışmayacaktır.
