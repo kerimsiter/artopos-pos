@@ -86,11 +86,6 @@ Next.js App Router'ın nimetlerinden faydalanarak, yine özellik bazlı (feature
 
 ---
 
-### 2. Altın Kurallar Dosyası
-
-Bu dosyayı projenin ana dizinine `PROJECT_GUIDELINES.md` olarak ekleyebilirsin. Bu, projeye yeni katılacak herkesin okuması gereken ilk dosya olur.
-
-````markdown
 # Proje Altın Kuralları & Geliştirme Rehberi
 
 Bu belge, projenin tutarlı, sürdürülebilir ve yüksek kalitede kalmasını sağlamak için oluşturulmuştur. Tüm geliştiricilerin bu kurallara uyması beklenmektedir.
