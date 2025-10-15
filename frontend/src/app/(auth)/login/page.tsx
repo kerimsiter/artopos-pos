@@ -137,7 +137,7 @@ export default function LoginPage() {
             <Button variant="outline" className="w-full text-body-m" type="button">
               <Plus className="w-6 h-6 mr-2" />
               <Typography as="span" variant="body-m" className="whitespace-pre">Üye Değil Misiniz? </Typography>
-              <Typography as="span" variant="body-m" weight="semibold" className="text-[#35C56E]">Şimdi Kaydolun</Typography>
+              <Typography as="span" variant="body-m" weight="semibold" className="text-primary">Şimdi Kaydolun</Typography>
             </Button>
           </div>
         </div>
