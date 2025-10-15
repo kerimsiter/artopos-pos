@@ -108,7 +108,7 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Checkbox id="remember-me" className="h-5 w-5"/>
+                <Checkbox id="remember-me" />
                 <Label htmlFor="remember-me" className="cursor-pointer text-neutral-600 dark:text-neutral-300">
                   Beni Hatırla
                 </Label>
@@ -134,10 +134,12 @@ export default function LoginPage() {
               <div className="flex-1 h-px bg-neutral-200"></div>
             </div>
             
-            <Button variant="outline" className="w-full text-body-m" type="button">
-              <Plus className="w-6 h-6 mr-2" />
-              <Typography as="span" variant="body-m" className="whitespace-pre">Üye Değil Misiniz? </Typography>
-              <Typography as="span" variant="body-m" weight="semibold" className="text-primary">Şimdi Kaydolun</Typography>
+            <Button variant="outline" className="w-full text-body-m" asChild>
+              <Link href="/register">
+                <Plus className="w-6 h-6 mr-2" />
+                <Typography as="span" variant="body-m" className="whitespace-pre">Üye Değil Misiniz? </Typography>
+                <Typography as="span" variant="body-m" weight="semibold" className="text-primary hover:text-primary-600">Şimdi Kaydolun</Typography>
+              </Link>
             </Button>
           </div>
         </div>
