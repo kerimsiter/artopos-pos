@@ -1,6 +1,7 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Quote, EyeOff, Headset } from "lucide-react";
+import { Quote, EyeOff, Eye, Headset, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,15 +9,17 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Typography } from "@/components/ui/typography";
 import { Icons } from "@/components/icons";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <main className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       {/* --- Sol Taraf: Tanıtım --- */}
       <section className="relative hidden flex-col justify-between bg-neutral-900 p-10 text-white lg:flex">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          // Bu görseli public/images/login-bg.jpg adresine eklemelisin
+          // Yeni referans görsele uygun bir görsel ekle: public/images/atropos-bg.jpg
           style={{ backgroundImage: "url(/images/login-bg.jpg)" }}
         />
         <div className="absolute inset-0 bg-neutral-900/60" />
@@ -66,55 +69,77 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <Typography variant="heading-3">
-              ClaPos'a Hoşgeldiniz
+              Atropos'a Hoşgeldiniz
             </Typography>
-            <Typography variant="body-l" className="mt-2 text-neutral-600 dark:text-neutral-300">
+            <Typography variant="body-l" className="mt-2 text-neutral-500 dark:text-neutral-300">
               Lütfen üyelik bilgileriniz ile giriş yapınız
             </Typography>
           </div>
 
           <form className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-Posta Adresi veya Telefon Numarası</Label>
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-body-m">E-Posta Adresi veya Telefon Numarası</Label>
               <Input id="email" type="email" placeholder="ornek@email.com" required />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Şifre</Label>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-body-m">Şifre</Label>
               <div className="relative">
-                <Input id="password" type="password" placeholder="••••••••" required />
-                <button type="button" className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-500 hover:text-neutral-700">
-                  <EyeOff className="h-5 w-5" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 z-10 flex items-center pr-4 text-neutral-500 hover:text-neutral-700"
+                >
+                  {showPassword ? (
+                    <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Checkbox id="remember-me" />
+                <Checkbox id="remember-me" className="h-5 w-5"/>
                 <Label htmlFor="remember-me" className="cursor-pointer text-neutral-600 dark:text-neutral-300">
-                  Beni hatırla
+                  Beni Hatırla
                 </Label>
               </div>
               <Link href="/forgot-password">
-                <Typography variant="body-s" weight="medium" className="text-primary hover:underline">
-                  Şifremi Unuttum
+                <Typography variant="body-s" weight="medium" className="text-[#35C56E] hover:underline">
+                  Şifremi Unuttum?
                 </Typography>
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" size="lg">
+            <Button type="submit" className="w-full">
               Giriş Yap
             </Button>
           </form>
 
-          <Typography variant="body-m" className="text-center text-neutral-600 dark:text-neutral-300">
-            Üye Değil Misiniz?{' '}
-            <Link href="/register">
-              <span className="font-semibold text-primary hover:underline">
-                Şimdi Kaydolun
-              </span>
-            </Link>
-          </Typography>
+          <div className="space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="flex-1 h-px bg-neutral-200"></div>
+              <Typography variant="body-m" className="text-neutral-600 font-semibold">
+                Veya
+              </Typography>
+              <div className="flex-1 h-px bg-neutral-200"></div>
+            </div>
+            
+            <Button variant="outline" className="w-full text-body-m" type="button">
+              <Plus className="w-6 h-6 mr-2" />
+              <Typography as="span" variant="body-m" className="whitespace-pre">Üye Değil Misiniz? </Typography>
+              <Typography as="span" variant="body-m" weight="semibold" className="text-[#35C56E]">Şimdi Kaydolun</Typography>
+            </Button>
+          </div>
         </div>
       </section>
     </main>
