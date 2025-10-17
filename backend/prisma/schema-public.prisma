@@ -1,0 +1,256 @@
+// Public Schema - Tenant Yönetimi
+// Bu schema sadece tenant metadata'sını tutar
+// Her tenant'ın kendi verileri ayrı schema'da olacak
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-public"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public"]
+}
+
+// ==================== TENANT YÖNETİMİ ====================
+
+model Tenant {
+  id   String @id @default(cuid())
+  
+  // Temel Bilgiler
+  name        String // "Taflan Restoran"
+  slug        String @unique // "taflan-restoran" (subdomain için)
+  description String?
+  logo        String?
+  
+  // Domain Yönetimi
+  subdomain    String  @unique // "taflan" -> taflan.artopos.app
+  customDomain String? @unique // "pos.taflanrestoran.com"
+  
+  // Database
+  schemaName String @unique // "tenant_taflan_restoran"
+  
+  // İletişim
+  email       String
+  phone       String
+  address     String?
+  taxNumber   String? @unique
+  taxOffice   String?
+  
+  // Durum
+  status TenantStatus @default(TRIAL)
+  
+  // Abonelik
+  plan           SubscriptionPlan @default(TRIAL)
+  trialEndsAt    DateTime?
+  subscriptionId String?
+  
+  // Limitler (Plan bazlı)
+  maxBranches Int @default(1)
+  maxUsers    Int @default(5)
+  maxProducts Int @default(100)
+  
+  // Özellikler
+  features Json? // { "kds": true, "online_orders": false, "analytics": true }
+  
+  // Metadata
+  metadata Json? // Ekstra bilgiler
+  
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft delete
+  
+  // İlişkiler
+  subscriptions TenantSubscription[]
+  invitations   TenantInvitation[]
+  apiKeys       TenantApiKey[]
+  webhooks      TenantWebhook[]
+  
+  @@index([slug])
+  @@index([subdomain])
+  @@index([customDomain])
+  @@index([status])
+  @@schema("public")
+}
+
+enum TenantStatus {
+  TRIAL       // Deneme sürümü
+  ACTIVE      // Aktif abonelik
+  SUSPENDED   // Askıya alınmış (ödeme sorunu)
+  CANCELLED   // İptal edilmiş
+  ARCHIVED    // Arşivlenmiş
+  
+  @@schema("public")
+}
+
+enum SubscriptionPlan {
+  TRIAL      // 14 gün deneme
+  BASIC      // Temel plan (1 şube, 5 kullanıcı)
+  STANDARD   // Standart plan (3 şube, 15 kullanıcı)
+  PREMIUM    // Premium plan (10 şube, 50 kullanıcı)
+  ENTERPRISE // Kurumsal plan (sınırsız)
+  
+  @@schema("public")
+}
+
+// ==================== ABONELİK YÖNETİMİ ====================
+
+model TenantSubscription {
+  id       String @id @default(cuid())
+  tenantId String
+  
+  plan           SubscriptionPlan
+  status         SubscriptionStatus @default(ACTIVE)
+  
+  // Fiyatlandırma
+  amount         Decimal @db.Decimal(10, 2)
+  currency       String  @default("TRY")
+  billingCycle   BillingCycle @default(MONTHLY)
+  
+  // Dönem
+  startDate      DateTime
+  endDate        DateTime
+  nextBillingAt  DateTime?
+  cancelledAt    DateTime?
+  
+  // Ödeme
+  paymentMethod  String? // "credit_card", "bank_transfer"
+  lastPaymentAt  DateTime?
+  lastPaymentId  String?
+  
+  // Metadata
+  metadata       Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([status])
+  @@index([endDate])
+  @@schema("public")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE    // Ödeme gecikmiş
+  CANCELLED
+  EXPIRED
+  
+  @@schema("public")
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  
+  @@schema("public")
+}
+
+// ==================== DAVET YÖNETİMİ ====================
+
+model TenantInvitation {
+  id       String @id @default(cuid())
+  tenantId String
+  
+  email     String
+  role      String // "admin", "manager", "staff"
+  token     String @unique
+  
+  status    InvitationStatus @default(PENDING)
+  
+  invitedBy String? // User ID
+  acceptedBy String? // User ID
+  
+  expiresAt DateTime
+  acceptedAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([email])
+  @@index([token])
+  @@schema("public")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+  
+  @@schema("public")
+}
+
+// ==================== API KEY YÖNETİMİ ====================
+
+model TenantApiKey {
+  id       String @id @default(cuid())
+  tenantId String
+  
+  name        String // "Production API", "Test API"
+  key         String @unique // Hashed
+  prefix      String // "pk_live_", "pk_test_"
+  
+  permissions Json? // { "orders": ["read", "write"], "products": ["read"] }
+  
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  
+  active      Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([key])
+  @@schema("public")
+}
+
+// ==================== WEBHOOK YÖNETİMİ ====================
+
+model TenantWebhook {
+  id       String @id @default(cuid())
+  tenantId String
+  
+  url         String
+  events      String[] // ["order.created", "order.completed"]
+  secret      String // Webhook signature için
+  
+  active      Boolean @default(true)
+  
+  lastTriggeredAt DateTime?
+  failureCount    Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@schema("public")
+}
+
+// ==================== SİSTEM AYARLARI ====================
+
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+  
+  description String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@schema("public")
+}
