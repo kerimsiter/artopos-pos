@@ -13,7 +13,7 @@ export const countriesData: Country[] = [
     name: "Türkiye",
     dialCode: "+90",
     flag: "🇹🇷",
-    format: "5XX XXX XX XX",
+    format: "XXX XXX XX XX",
     maxLength: 10
   },
   {
@@ -306,22 +306,22 @@ export const formatPhoneNumber = (value: string, format?: string): string => {
   
   // Sadece rakamları al
   const numbers = value.replace(/\D/g, '');
+  if (numbers.length === 0) return '';
+  
   let formatted = '';
   let numberIndex = 0;
   
-  for (let i = 0; i < format.length; i++) {
+  for (let i = 0; i < format.length && numberIndex < numbers.length; i++) {
     if (format[i] === 'X') {
-      if (numberIndex < numbers.length) {
-        formatted += numbers[numberIndex];
-        numberIndex++;
-      } else {
-        break;
+      // X yerine kullanıcının girdiği rakamı koy
+      formatted += numbers[numberIndex];
+      numberIndex++;
+    } else {
+      // Boşluk, tire, parantez gibi format karakterleri
+      // Sadece en az bir rakam girildiyse format karakterini ekle
+      if (numberIndex > 0) {
+        formatted += format[i];
       }
-    } else if (format[i] === '5' && i === 0) {
-      // İlk karakterde 5 varsa (Türkiye için)
-      formatted += '5';
-    } else if (numberIndex > 0 && numberIndex <= numbers.length) {
-      formatted += format[i];
     }
   }
   
